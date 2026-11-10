@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>K-Map Solver</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="hero"><div class="brand"><div class="logo"><i></i><i></i><i></i><i></i></div><div><h1>K-Map Solver</h1><p>Truth Table · Boolean Expression · Logic Circuit · Word Problems</p></div></div></header>
+<main>
+<nav class="tabs" id="tabs">
+ <button data-tab="k" class="on"><b>▦</b><span>K-Map</span><small>املأ الخريطة</small></button>
+ <button data-tab="t"><b>☰</b><span>Truth Table</span><small>عدّل الجدول</small></button>
+ <button data-tab="e"><b>ƒ</b><span>معادلة</span><small>اكتب السؤال</small></button>
+ <button data-tab="w"><b>📷</b><span>مسألة</span><small>صورة أو نص</small></button>
+</nav>
+
+<section class="card" data-p="k">
+ <h2 class="t"><i class="ic">▦</i>K-Map <small>املأ الخريطة ثم Solve</small></h2>
+ <div class="row"><span class="lbl">عدد المتغيرات</span><div class="seg nSeg"><button data-n="2">2</button><button data-n="3" class="on">3</button><button data-n="4">4</button></div></div>
+ <div class="row"><span class="lbl">نوع الإدخال</span><div class="seg" id="mSeg"><button data-m="sop" class="on">Minterms (SOP)</button><button data-m="pos">Maxterms (POS)</button></div></div>
+ <div class="row"><span class="lbl" id="tl">Minterms</span><input type="text" id="tin" placeholder="1,3,5,7"></div>
+ <div class="sw" id="map"></div>
+ <p class="hint">اضغط على أي خلية لتبديلها بين 0 و1. الرقم الصغير في الزاوية هو رقم الـ minterm.</p>
+ <div class="row act"><button class="go solve">Solve</button><button class="sec reset">مسح</button></div>
+</section>
+
+<section class="card" data-p="t" hidden>
+ <h2 class="t"><i class="ic">☰</i>Truth Table <small>اضغط على قيمة F لتبديلها</small></h2>
+ <div class="row"><span class="lbl">المتغيرات</span><input type="text" id="tvars" value="A,B,C" placeholder="A,B,C"></div>
+ <div class="row"><span class="lbl">أمثلة</span><button class="sec tv">A,B</button><button class="sec tv">A,B,C</button><button class="sec tv">A,B,C,D</button><button class="sec tv">A,C,D</button><button class="sec tv">X,Y,Z</button></div>
+ <div class="row"><span class="lbl">أعمدة إضافية</span><input type="text" id="tcols" placeholder="A', C', D', A'B"></div>
+ <div id="terr" class="hint err"></div>
+ <p class="hint">اكتب المتغيرات اللي عايزها (من 2 إلى 4 حروف، أي حروف). الأعمدة الإضافية اختيارية: اكتب أي متمم أو حد مفصول بفاصلة، مثل <code>A', D'</code> أو <code>A'B</code>، وهيظهر كعمود في الجدول.</p>
+ <div class="sw" id="tt"></div>
+ <div class="row act"><button class="go solve">Solve</button><button class="sec reset">مسح</button></div>
+</section>
+
+<section class="card" data-p="e" hidden>
+ <h2 class="t"><i class="ic">ƒ</i>اكتب السؤال <small>Boolean Expression</small></h2>
+ <div class="row"><input type="text" id="ein" placeholder="A'B + AC + BC'"><button class="go" id="esolve">حل</button></div>
+ <div id="eerr" class="hint err"></div>
+ <div class="row"><span class="lbl">أمثلة</span><button class="sec ex">A'B + AC</button><button class="sec ex">(A+B)(A'+C)</button><button class="sec ex">AB' + A'B</button><button class="sec ex">A'B'C + A'BC + AB'C' + ABC</button></div>
+ <p class="hint">المتغيرات من A إلى D. المتمم: <code>A'</code> أو <code>!A</code> أو <code>~A</code>. الجمع: <code>+</code>. الضرب: <code>AB</code> أو <code>A*B</code>. XOR: <code>^</code>. الأقواس مسموحة مثل <code>(A+B)'</code>. ممكن تبدأ بـ <code>F =</code>.</p>
+</section>
+
+<section class="card" data-p="w" hidden>
+ <h2 class="t"><i class="ic">📷</i>مسألة كلامية <small>صورة أو نص</small></h2>
+ <label class="drop"><input type="file" id="wfile" accept="image/*" hidden><div id="wprev"><b>اضغط لرفع صورة المسألة</b><small>أو اكتب المسألة في الخانة اللي تحت</small></div></label>
+ <textarea id="wtxt" rows="3" placeholder="مثال: جهاز إنذار يشتغل لو الباب مفتوح والمفتاح مش موجود، أو لو الحساس الحراري شغال..."></textarea>
+ <div class="row"><button class="go" id="wgo">حلّل المسألة</button><button class="sec" id="wclr">مسح</button></div>
+ <div id="werr" class="hint err"></div><div id="wout"></div>
+ <p class="hint">Claude يقرأ المسألة، يحدد المتغيرات (A–D) ويكتب الدالة F، وبعدها الصفحة تبني الجدول والخريطة والدائرة. راجع المتغيرات المستخرجة قبل ما تعتمد على النتيجة.</p>
+</section>
+
+<div id="out" hidden>
+ <div class="divider"><span>النتيجة</span></div>
+ <section class="card" data-show="k,e,w"><h2 class="t"><i class="ic">☰</i>Truth Table</h2><div class="sw" id="tt2"></div><div id="xc" class="row" style="justify-content:center;margin-top:12px"></div><p class="hint">الأزرار بتتحكم في الأعمدة الإضافية: المتممات (A′ وB′...) وحدود المعادلة. اضغط لإظهار العمود أو إخفائه. النقطة الملونة بتبيّن المجموعة اللي بتغطي الصف.</p></section>
+ <section class="card" data-show="t,e,w"><h2 class="t"><i class="ic">▦</i>K-Map</h2><div class="sw" id="map2"></div></section>
+ <section class="card"><h2 class="t"><i class="ic">F</i>المعادلة المبسطة <div class="seg rSeg" data-show="t,e,w"><button data-m="sop" class="on">SOP</button><button data-m="pos">POS</button></div></h2><div class="res" id="expr"></div><div class="res" id="canon" data-show="t,e,w"></div><div id="legend" style="text-align:center;margin-top:8px"></div></section>
+ <section class="card" id="cc"><h2 class="t"><i class="ic">⏚</i>الدائرة المنطقية</h2><div class="sw" id="circ"></div><p class="hint">لون كل بوابة هو نفس لون المجموعة على الخريطة.</p></section>
+ <section class="card"><h2 class="t"><i class="ic">≡</i>خطوات الحل</h2><ol id="steps"></ol></section>
+</div>
+</main>
+<script src="js/state.js"></script>
+<script src="js/ui-state.js"></script>
+<script src="js/parser.js"></script>
+<script src="js/kmap-render.js"></script>
+<script src="js/truth-table.js"></script>
+<script src="js/expression.js"></script>
+<script src="js/solver.js"></script>
+<script src="js/circuit.js"></script>
+<script src="js/word-problem.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
